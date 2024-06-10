@@ -5,6 +5,7 @@ import (
 	"{{index .PackageRoutes "package_name"}}/internal/logger"
 	"{{index .PackageRoutes "package_name"}}/internal/models"
 	"{{index .PackageRoutes "package_name"}}/internal/msg"
+	"{{index .PackageRoutes "package_name"}}internal/messages"
 	"github.com/jmoiron/sqlx"
 	"github.com/google/uuid"
 	"github.com/asaskevich/govalidator"
@@ -28,24 +29,25 @@ type handler{{.Name}} struct {
 // @Failure 202 {object} Response{{.Name}}
 // @Router /api/v1/{{lwc .Name}} [POST]
 func (h *handler{{.Name}}) Create{{.Name}}(c *fiber.Ctx) error {
+    msg := messages.NewMsgs(h.db)
     res := Response{{.Name}}{Error: true}
     req := Request{{.Name}}{}
     if err := c.BodyParser(&req); err != nil {
     		logger.Error.Printf("couldn't parse body request, error: %v", err)
-    		res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+    		res.Code, res.Type, res.Msg = msg.GetByCode(1)
     		return c.Status(http.StatusBadRequest).JSON(res)
     }
 
     isValid, err := req.valid()
     if err != nil {
         logger.Error.Printf("couldn't validate body request, error: %v", err)
-        res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+        res.Code, res.Type, res.Msg = msg.GetByCode(1)
         return c.Status(http.StatusBadRequest).JSON(res)
     }
 
     if !isValid {
         logger.Error.Println("couldn't validate body request")
-        res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+        res.Code, res.Type, res.Msg = msg.GetByCode(1)
         return c.Status(http.StatusBadRequest).JSON(res)
     }
 
@@ -54,13 +56,13 @@ func (h *handler{{.Name}}) Create{{.Name}}(c *fiber.Ctx) error {
     data, code, err := srv.Srv{{.Name}}.Create{{.Name}}(uuid.New().String(),{{range $i, $v := .Fields -}} req.{{ucc .Name}}{{if lt $i (dec $length)}}, {{end}}{{end -}})
     if err != nil {
         logger.Error.Printf("couldn't create {{.Name}}, error: %v", err)
-        res.Code, res.Type, res.Msg = msg.GetByCode(code, h.db, h.txID)
+        res.Code, res.Type, res.Msg = msg.GetByCode(code)
         return c.Status(http.StatusAccepted).JSON(res)
     }
 
     res.Data = data
     res.Error = false
-    res.Code, res.Type, res.Msg = msg.GetByCode(29, h.db, h.txID)
+    res.Code, res.Type, res.Msg = msg.GetByCode(29)
     return c.Status(http.StatusCreated).JSON(res)
 }
 
@@ -76,24 +78,25 @@ func (h *handler{{.Name}}) Create{{.Name}}(c *fiber.Ctx) error {
 // @Failure 202 {object} Response{{.Name}}
 // @Router /api/v1/{{lwc .Name}} [PUT]
 func (h *handler{{.Name}}) Update{{.Name}}(c *fiber.Ctx) error {
+   msg := messages.NewMsgs(h.db)
    res := Response{{.Name}}{Error: true}
    req := Request{{.Name}}{}
    if err := c.BodyParser(&req); err != nil {
         logger.Error.Printf("couldn't parse body request, error: %v", err)
-        res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+        res.Code, res.Type, res.Msg = msg.GetByCode(1)
         return c.Status(http.StatusBadRequest).JSON(res)
    }
 
    isValid, err := req.valid()
    if err != nil {
        logger.Error.Printf("couldn't validate body request, error: %v", err)
-       res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+       res.Code, res.Type, res.Msg = msg.GetByCode(1)
        return c.Status(http.StatusBadRequest).JSON(res)
    }
 
    if !isValid {
        logger.Error.Println("couldn't validate body request")
-       res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+       res.Code, res.Type, res.Msg = msg.GetByCode(1)
        return c.Status(http.StatusBadRequest).JSON(res)
    }
 
@@ -102,13 +105,13 @@ func (h *handler{{.Name}}) Update{{.Name}}(c *fiber.Ctx) error {
    data, code, err := srv.Srv{{.Name}}.Update{{.Name}}(req.ID{{range .Fields -}}, req.{{ucc .Name}} {{end -}})
    if err != nil {
        logger.Error.Printf("couldn't update {{.Name}}, error: %v", err)
-       res.Code, res.Type, res.Msg = msg.GetByCode(code, h.db, h.txID)
+       res.Code, res.Type, res.Msg = msg.GetByCode(code)
        return c.Status(http.StatusAccepted).JSON(res)
    }
 
    res.Data = data
    res.Error = false
-   res.Code, res.Type, res.Msg = msg.GetByCode(29, h.db, h.txID)
+   res.Code, res.Type, res.Msg = msg.GetByCode(29)
    return c.Status(http.StatusOK).JSON(res)
 }
 
@@ -124,17 +127,18 @@ func (h *handler{{.Name}}) Update{{.Name}}(c *fiber.Ctx) error {
 // @Failure 202 {object} Response{{.Name}}
 // @Router /api/v1/{{lwc .Name}} [DELETE]
 func (h *handler{{.Name}}) Delete{{.Name}}(c *fiber.Ctx) error {
+    msg := messages.NewMsgs(h.db)
     res := Response{{.Name}}{Error: true}
     id := c.Params("id")
     if id == "" {
         logger.Error.Println("id request no valid")
-        res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+        res.Code, res.Type, res.Msg = msg.GetByCode(1)
         return c.Status(http.StatusBadRequest).JSON(res)
     }
 
     if !govalidator.IsUUIDv4(id) {
         logger.Error.Println("id request is not a valid uuid")
-        res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+        res.Code, res.Type, res.Msg = msg.GetByCode(1)
         return c.Status(http.StatusBadRequest).JSON(res)
     }
 
@@ -143,12 +147,12 @@ func (h *handler{{.Name}}) Delete{{.Name}}(c *fiber.Ctx) error {
     code, err := srv.Srv{{.Name}}.Delete{{.Name}}(id)
     if err != nil {
         logger.Error.Printf("couldn't delete {{.Name}}, error: %v", err)
-        res.Code, res.Type, res.Msg = msg.GetByCode(code, h.db, h.txID)
+        res.Code, res.Type, res.Msg = msg.GetByCode(code)
         return c.Status(http.StatusAccepted).JSON(res)
     }
 
     res.Error = false
-    res.Code, res.Type, res.Msg = msg.GetByCode(29, h.db, h.txID)
+    res.Code, res.Type, res.Msg = msg.GetByCode(29)
     return c.Status(http.StatusOK).JSON(res)
 }
 
@@ -164,17 +168,18 @@ func (h *handler{{.Name}}) Delete{{.Name}}(c *fiber.Ctx) error {
 // @Failure 202 {object} Response{{.Name}}
 // @Router /api/v1/{{lwc .Name}}/:id [GET]
 func (h *handler{{.Name}}) Get{{.Name}}ByID(c *fiber.Ctx) error {
+    msg := messages.NewMsgs(h.db)
     res := Response{{.Name}}{Error: true}
     id := c.Params("id")
     if id == "" {
         logger.Error.Println("id request no valid")
-        res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+        res.Code, res.Type, res.Msg = msg.GetByCode(1)
         return c.Status(http.StatusBadRequest).JSON(res)
     }
 
     if !govalidator.IsUUIDv4(id) {
         logger.Error.Println("id request is not a valid uuid")
-        res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+        res.Code, res.Type, res.Msg = msg.GetByCode(1)
         return c.Status(http.StatusBadRequest).JSON(res)
     }
 
@@ -183,13 +188,13 @@ func (h *handler{{.Name}}) Get{{.Name}}ByID(c *fiber.Ctx) error {
     data, code, err := srv.Srv{{.Name}}.Get{{.Name}}ByID(id)
     if err != nil {
         logger.Error.Printf("couldn't get {{.Name}} by id, error: %v", err)
-        res.Code, res.Type, res.Msg = msg.GetByCode(code, h.db, h.txID)
+        res.Code, res.Type, res.Msg = msg.GetByCode(code)
         return c.Status(http.StatusAccepted).JSON(res)
     }
 
     res.Data = data
     res.Error = false
-    res.Code, res.Type, res.Msg = msg.GetByCode(29, h.db, h.txID)
+    res.Code, res.Type, res.Msg = msg.GetByCode(29)
     return c.Status(http.StatusOK).JSON(res)
 }
 
@@ -204,19 +209,19 @@ func (h *handler{{.Name}}) Get{{.Name}}ByID(c *fiber.Ctx) error {
 // @Router /api/v1/{{lwc .Name}}/all [GET]
 func (h *handler{{.Name}}) GetAll{{.Name}}(c *fiber.Ctx) error {
 	res := Response{{.Name}}{Error: true}
-
+    msg := messages.NewMsgs(h.db)
     // TODO replace pkgReplaceME for the package name
     srv := pkgReplaceME.NewServerPkgReplaceME(h.db, nil, h.txID)
     data, err := srv.Srv{{.Name}}.GetAll{{.Name}}()
     if err != nil {
         logger.Error.Printf("couldn't get all {{.Name}}, error: %v", err)
-        res.Code, res.Type, res.Msg = msg.GetByCode(22, h.db, h.txID)
+        res.Code, res.Type, res.Msg = msg.GetByCode(22)
         return c.Status(http.StatusAccepted).JSON(res)
     }
 
     res.Data = data
 	res.Error = false
-    res.Code, res.Type, res.Msg = msg.GetByCode(29, h.db, h.txID)
+    res.Code, res.Type, res.Msg = msg.GetByCode(29)
 	return c.Status(http.StatusOK).JSON(res)
 }
 

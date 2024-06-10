@@ -9,10 +9,10 @@ func Router{{.Name}}(app *fiber.App, db *sqlx.DB, txID string) {
 	h := handler{{.Name}}{db: db, txID: txID}
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
-	{{.Name}} := v1.Group("/{{lwc .Name}}")
-	{{.Name}}.Post("/", h.Create{{.Name}})
-	{{.Name}}.Put("/", h.Update{{.Name}})
-	{{.Name}}.Get("/all", h.GetAll{{.Name}})
-	{{.Name}}.Get("/:id", h.Get{{.Name}}ByID)
-	{{.Name}}.Delete("/:id", h.Delete{{.Name}})
+	{{lcc .Name}} := v1.Group("/{{lwc .Name}}")
+	{{lcc .Name}}.Post("/", h.Create{{.Name}})
+	{{lcc .Name}}.Put("/", h.Update{{.Name}})
+	{{lcc .Name}}.Get("/", h.GetAll{{.Name}})
+	{{lcc .Name}}.Get("/:id", h.Get{{.Name}}ByID)
+	{{lcc .Name}}.Delete("/:id", h.Delete{{.Name}})
 }
