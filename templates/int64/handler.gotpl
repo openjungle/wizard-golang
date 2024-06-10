@@ -11,7 +11,7 @@ import (
 )
 
 type handler{{.Name}} struct {
-    db *slqx.DB
+    db *sqlx.DB
     txID string
 }
 
@@ -35,10 +35,16 @@ func (h *handler{{.Name}}) Create{{.Name}}(c *fiber.Ctx) error {
     		return c.Status(http.StatusBadRequest).JSON(res)
     }
 
-    code, err := req.valid()
+    isValid, err := req.valid()
     if err != nil {
         logger.Error.Printf("couldn't validate body request, error: %v", err)
-        res.Code, res.Type, res.Msg = msg.GetByCode(code, h.db, h.txID)
+        res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+        return c.Status(http.StatusBadRequest).JSON(res)
+    }
+
+    if !isValid {
+        logger.Error.Println("couldn't validate body request")
+        res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
         return c.Status(http.StatusBadRequest).JSON(res)
     }
 
@@ -77,10 +83,16 @@ func (h *handler{{.Name}}) Update{{.Name}}(c *fiber.Ctx) error {
         return c.Status(http.StatusBadRequest).JSON(res)
    }
 
-   code, err := req.valid()
+   isValid, err := req.valid()
    if err != nil {
        logger.Error.Printf("couldn't validate body request, error: %v", err)
-       res.Code, res.Type, res.Msg = msg.GetByCode(code, h.db, h.txID)
+       res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+       return c.Status(http.StatusBadRequest).JSON(res)
+   }
+
+   if !isValid {
+       logger.Error.Println("couldn't validate body request")
+       res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
        return c.Status(http.StatusBadRequest).JSON(res)
    }
 

@@ -6,12 +6,13 @@ import (
 	"{{index .PackageRoutes "package_name"}}/internal/models"
 	"{{index .PackageRoutes "package_name"}}/internal/msg"
 	"github.com/jmoiron/sqlx"
+	"github.com/google/uuid"
 	"net/http"
 	"strconv"
 )
 
 type handler{{.Name}} struct {
-    db *slqx.DB
+    db *sqlx.DB
     txID string
 }
 
@@ -35,16 +36,22 @@ func (h *handler{{.Name}}) Create{{.Name}}(c *fiber.Ctx) error {
     		return c.Status(http.StatusBadRequest).JSON(res)
     }
 
-    code, err := req.valid()
+    isValid, err := req.valid()
     if err != nil {
         logger.Error.Printf("couldn't validate body request, error: %v", err)
-        res.Code, res.Type, res.Msg = msg.GetByCode(code, h.db, h.txID)
+        res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+        return c.Status(http.StatusBadRequest).JSON(res)
+    }
+
+    if !isValid {
+        logger.Error.Println("couldn't validate body request")
+        res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
         return c.Status(http.StatusBadRequest).JSON(res)
     }
 
     // TODO replace pkgReplaceME for the package name
     srv := pkgReplaceME.NewServerPkgReplaceME(h.db, nil, h.txID)
-    data, code, err := srv.Srv{{.Name}}.Create{{.Name}}({{range $i, $v := .Fields -}} req.{{ucc .Name}}{{if lt $i (dec $length)}}, {{end}}{{end -}})
+    data, code, err := srv.Srv{{.Name}}.Create{{.Name}}(uuid.New().String(),{{range $i, $v := .Fields -}} req.{{ucc .Name}}{{if lt $i (dec $length)}}, {{end}}{{end -}})
     if err != nil {
         logger.Error.Printf("couldn't create {{.Name}}, error: %v", err)
         res.Code, res.Type, res.Msg = msg.GetByCode(code, h.db, h.txID)
@@ -77,10 +84,16 @@ func (h *handler{{.Name}}) Update{{.Name}}(c *fiber.Ctx) error {
         return c.Status(http.StatusBadRequest).JSON(res)
    }
 
-   code, err := req.valid()
+   isValid, err := req.valid()
    if err != nil {
        logger.Error.Printf("couldn't validate body request, error: %v", err)
-       res.Code, res.Type, res.Msg = msg.GetByCode(code, h.db, h.txID)
+       res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+       return c.Status(http.StatusBadRequest).JSON(res)
+   }
+
+   if !isValid {
+       logger.Error.Println("couldn't validate body request")
+       res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
        return c.Status(http.StatusBadRequest).JSON(res)
    }
 
