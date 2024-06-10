@@ -4,6 +4,7 @@ package {{pkg .Table}}
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/jmoiron/sqlx"
     "{{index .PackageRoutes "package_name"}}/internal/models"

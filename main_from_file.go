@@ -38,18 +38,10 @@ func generateFromFile(file string) {
 		}
 
 		h = record[0]
-		fields := ""
-		if h == "api" {
-			id = record[1]
-			n = record[2]
-			t = record[3]
-			fields = record[4]
-		} else {
-			id = record[0]
-			n = record[1]
-			t = record[2]
-			fields = record[3]
-		}
+		id = record[1]
+		n = record[2]
+		t = record[3]
+		fields := record[4]
 
 		if t == "" {
 			color.Red(fmt.Sprintf("no se procesó el modelo: %s porque no se recibieron campos", id))
