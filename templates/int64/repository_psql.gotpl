@@ -27,7 +27,8 @@ func new{{.Name}}PsqlRepository(db *sqlx.DB, user *models.User, txID string) *ps
 
 // Create registra en la BD
 func (s *psql) create(m *{{.Name}}) error {
-	const psqlInsert = `INSERT INTO {{.Table}} ({{range $i, $v := .Fields}}{{.Name}}{{if lt $i (dec $length)}}, {{end}}{{end -}}) VALUES ({{range $i, $v := .Fields}}${{inc $i}}{{if lt $i (dec $length)}}, {{end}}{{end -}}) RETURNING id, created_at, updated_at`
+    m.UserCreator = s.user.ID
+	const psqlInsert = `INSERT INTO {{.Table}} ({{range $i, $v := .Fields}}{{.Name}}{{if lt $i (dec $length)}}, {{end}}{{end -}}, user_creator) VALUES ({{range $i, $v := .Fields}}${{inc $i}}{{if lt $i (dec $length)}}, {{end}}{{end -}}, :user_creator) RETURNING id, created_at, updated_at`
     stmt, err := s.DB.Prepare(psqlInsert)
     if err != nil {
     	return err
@@ -37,6 +38,7 @@ func (s *psql) create(m *{{.Name}}) error {
         {{range .Fields -}}
         {{fieldSQL .}},
         {{end -}}
+        m.UserCreator,
     ).Scan(&m.ID, &m.CreatedAt, &m.UpdatedAt)
     if err != nil {
     	return err
@@ -48,7 +50,8 @@ func (s *psql) create(m *{{.Name}}) error {
 func (s *psql) update(m *{{.Name}}) error {
     date := time.Now()
     m.UpdatedAt = date
-	const psqlUpdate = `UPDATE {{.Table}} SET {{range $i, $v := .Fields}}{{.Name}} = :{{.Name}}, {{end -}}updated_at = :updated_at WHERE id = :id `
+    m.UserCreator = s.user.ID
+	const psqlUpdate = `UPDATE {{.Table}} SET {{range $i, $v := .Fields}}{{.Name}} = :{{.Name}}, {{end -}}user_creator = :user_creator, updated_at = :updated_at WHERE id = :id `
 	rs, err := s.DB.NamedExec(psqlUpdate, &m)
 	if err != nil {
 		return err
@@ -75,7 +78,7 @@ func (s *psql) delete(id int64) error {
 
 // GetByID consulta un registro por su ID
 func (s *psql) getByID(id int64) (*{{.Name}}, error) {
-	const psqlGetByID = `SELECT id , {{range .Fields}}{{.Name}}, {{end -}}created_at, updated_at FROM {{.Table}} WHERE id = $1 `
+	const psqlGetByID = `SELECT id , {{range .Fields}}{{.Name}}, {{end -}}is_deleted, user_deleter, deleted_at, user_creator, created_at, updated_at FROM {{.Table}} WHERE id = $1 `
 	mdl := {{.Name}}{}
 	err := s.DB.Get(&mdl, psqlGetByID, id)
 	if err != nil {
@@ -90,7 +93,7 @@ func (s *psql) getByID(id int64) (*{{.Name}}, error) {
 // GetAll consulta todos los registros de la BD
 func (s *psql) getAll() ([]*{{.Name}}, error) {
 	var ms []*{{.Name}}
-	const psqlGetAll = ` SELECT id , {{range .Fields}}{{.Name}}, {{end -}}created_at, updated_at FROM {{.Table}} `
+	const psqlGetAll = ` SELECT id , {{range .Fields}}{{.Name}}, {{end -}}is_deleted, user_deleter, deleted_at, user_creator, created_at, updated_at FROM {{.Table}} `
 
 	err := s.DB.Select(&ms, psqlGetAll)
 	if err != nil {

@@ -12,8 +12,12 @@ type {{.Name}}  struct {
         {{range .Fields -}}
         {{ucc .Name}} {{mdlType .Type}} `json:"{{.Name}}" db:"{{.Name}}" valid:"required"`
         {{end -}}
-        CreatedAt time.Time `json:"created_at" db:"created_at"`
-        UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+        IsDeleted   bool         `json:"is_deleted" db:"is_deleted"`
+        UserDeleter *string      `json:"user_deleter" db:"user_deleter"`
+        DeletedAt   *time.Time   `json:"deleted_at" db:"deleted_at"`
+        UserCreator string       `json:"user_creator" db:"user_creator"`
+        CreatedAt   time.Time    `json:"created_at" db:"created_at"`
+        UpdatedAt   time.Time    `json:"updated_at" db:"updated_at"`
 }
 
 func New{{.Name}}(id int64,{{range .Fields -}} {{lcc .Name}} {{mdlType .Type}} ,{{end -}}) *{{.Name}} {
@@ -22,6 +26,7 @@ func New{{.Name}}(id int64,{{range .Fields -}} {{lcc .Name}} {{mdlType .Type}} ,
 		{{range .Fields -}}
 		{{ucc .Name}} : {{lcc .Name}},
 		{{end -}}
+		IsDeleted:    false,
 	}
 }
 
