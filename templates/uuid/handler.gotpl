@@ -165,6 +165,7 @@ func (h *handler{{.Name}}) Delete{{.Name}}(c *fiber.Ctx) error {
 // @Router /api/v1/{{lwc .Name}}/:id [GET]
 func (h *handler{{.Name}}) Get{{.Name}}ByID(c *fiber.Ctx) error {
     res := Response{{.Name}}{Error: true}
+    id := c.Params("id")
     if id == "" {
         logger.Error.Println("id request no valid")
         res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
