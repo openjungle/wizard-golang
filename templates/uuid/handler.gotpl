@@ -7,8 +7,8 @@ import (
 	"{{index .PackageRoutes "package_name"}}/internal/msg"
 	"github.com/jmoiron/sqlx"
 	"github.com/google/uuid"
+	"github.com/asaskevich/govalidator"
 	"net/http"
-	"strconv"
 )
 
 type handler{{.Name}} struct {

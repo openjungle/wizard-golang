@@ -9,6 +9,7 @@
 *.dylib
 .csv
 go-wizard-ecatch-engine
+go-wizard-open-jungle
 
 # Test binary, build with `go test -c`
 *.test
