@@ -1,0 +1,208 @@
+{{ $length := len .Fields -}}
+package {{pkg .Table}}
+
+import (
+	"{{index .PackageRoutes "package_name"}}/internal/logger"
+	"{{index .PackageRoutes "package_name"}}/internal/models"
+	"{{index .PackageRoutes "package_name"}}/internal/msg"
+	"github.com/jmoiron/sqlx"
+	"net/http"
+	"strconv"
+)
+
+type handler{{.Name}} struct {
+    db *slqx.DB
+    txID string
+}
+
+// Create{{.Name}} godoc
+// @Summary Crear una instancia de {{.Name}}
+// @Description Método que permite crear una instancia del objeto {{.Name}} en la base de datos
+// @tags {{.Name}}
+// @Accept json
+// @Produce json
+// @Param Request{{.Name}} body Request{{.Name}} true "Datos para crear {{.Name}}"
+// @Success 201 {object} Response{{.Name}}
+// @Failure 400 {object} Response{{.Name}}
+// @Failure 202 {object} Response{{.Name}}
+// @Router /api/v1/{{lwc .Name}} [POST]
+func (h *handler{{.Name}}) Create{{.Name}}(c *fiber.Ctx) error {
+    res := Response{{.Name}}{Error: true}
+    req := Request{{.Name}}{}
+    if err := c.BodyParser(&req); err != nil {
+    		logger.Error.Printf("couldn't parse body request, error: %v", err)
+    		res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+    		return c.Status(http.StatusBadRequest).JSON(res)
+    }
+
+    code, err := req.valid()
+    if err != nil {
+        logger.Error.Printf("couldn't validate body request, error: %v", err)
+        res.Code, res.Type, res.Msg = msg.GetByCode(code, h.db, h.txID)
+        return c.Status(http.StatusBadRequest).JSON(res)
+    }
+
+    // TODO replace pkgReplaceME for the package name
+    srv := pkgReplaceME.NewServerPkgReplaceME(h.db, nil, h.txID)
+    data, code, err := srv.Srv{{.Name}}.Create{{.Name}}({{range $i, $v := .Fields -}} req.{{ucc .Name}}{{if lt $i (dec $length)}}, {{end}}{{end -}})
+    if err != nil {
+        logger.Error.Printf("couldn't create {{.Name}}, error: %v", err)
+        res.Code, res.Type, res.Msg = msg.GetByCode(code, h.db, h.txID)
+        return c.Status(http.StatusAccepted).JSON(res)
+    }
+
+    res.Data = data
+    res.Error = false
+    res.Code, res.Type, res.Msg = msg.GetByCode(29, h.db, h.txID)
+    return c.Status(http.StatusCreated).JSON(res)
+}
+
+// Update{{.Name}} godoc
+// @Summary Actualiza una instancia de {{.Name}}
+// @Description Método que permite Actualiza una instancia del objeto {{.Name}} en la base de datos
+// @tags {{.Name}}
+// @Accept json
+// @Produce json
+// @Param Request{{.Name}} body Request{{.Name}} true "Datos para actualizar {{.Name}}"
+// @Success 200 {object} Response{{.Name}}
+// @Failure 400 {object} Response{{.Name}}
+// @Failure 202 {object} Response{{.Name}}
+// @Router /api/v1/{{lwc .Name}} [PUT]
+func (h *handler{{.Name}}) Update{{.Name}}(c *fiber.Ctx) error {
+   res := Response{{.Name}}{Error: true}
+   req := Request{{.Name}}{}
+   if err := c.BodyParser(&req); err != nil {
+        logger.Error.Printf("couldn't parse body request, error: %v", err)
+        res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+        return c.Status(http.StatusBadRequest).JSON(res)
+   }
+
+   code, err := req.valid()
+   if err != nil {
+       logger.Error.Printf("couldn't validate body request, error: %v", err)
+       res.Code, res.Type, res.Msg = msg.GetByCode(code, h.db, h.txID)
+       return c.Status(http.StatusBadRequest).JSON(res)
+   }
+
+   // TODO replace pkgReplaceME for the package name
+   srv := pkgReplaceME.NewServerPkgReplaceME(h.db, nil, h.txID)
+   data, code, err := srv.Srv{{.Name}}.Update{{.Name}}(req.ID{{range .Fields -}}, req.{{ucc .Name}} {{end -}})
+   if err != nil {
+       logger.Error.Printf("couldn't update {{.Name}}, error: %v", err)
+       res.Code, res.Type, res.Msg = msg.GetByCode(code, h.db, h.txID)
+       return c.Status(http.StatusAccepted).JSON(res)
+   }
+
+   res.Data = data
+   res.Error = false
+   res.Code, res.Type, res.Msg = msg.GetByCode(29, h.db, h.txID)
+   return c.Status(http.StatusOK).JSON(res)
+}
+
+// Delete{{.Name}} godoc
+// @Summary Elimina una instancia de {{.Name}}
+// @Description Método que permite eliminar una instancia del objeto {{.Name}} en la base de datos
+// @tags {{.Name}}
+// @Accept json
+// @Produce json
+// @Param	id	path string true "{{.Name}} ID"
+// @Success 200 {object} Response{{.Name}}
+// @Failure 400 {object} Response{{.Name}}
+// @Failure 202 {object} Response{{.Name}}
+// @Router /api/v1/{{lwc .Name}} [DELETE]
+func (h *handler{{.Name}}) Delete{{.Name}}(c *fiber.Ctx) error {
+    res := Response{{.Name}}{Error: true}
+    id := c.Params("id")
+    if id == "" {
+        logger.Error.Println("id request no valid")
+        res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+        return c.Status(http.StatusBadRequest).JSON(res)
+    }
+
+    if !govalidator.IsUUIDv4(id) {
+        logger.Error.Println("id request is not a valid uuid")
+        res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+        return c.Status(http.StatusBadRequest).JSON(res)
+    }
+
+    // TODO replace pkgReplaceME for the package name
+    srv := pkgReplaceME.NewServerPkgReplaceME(h.db, nil, h.txID)
+    code, err := srv.Srv{{.Name}}.Delete{{.Name}}(id)
+    if err != nil {
+        logger.Error.Printf("couldn't delete {{.Name}}, error: %v", err)
+        res.Code, res.Type, res.Msg = msg.GetByCode(code, h.db, h.txID)
+        return c.Status(http.StatusAccepted).JSON(res)
+    }
+
+    res.Error = false
+    res.Code, res.Type, res.Msg = msg.GetByCode(29, h.db, h.txID)
+    return c.Status(http.StatusOK).JSON(res)
+}
+
+// Get{{.Name}}ByID godoc
+// @Summary Obtiene una instancia de {{.Name}} por su id
+// @Description Método que permite obtener una instancia del objeto {{.Name}} en la base de datos por su id
+// @tags {{.Name}}
+// @Accept json
+// @Produce json
+// @Param	id	path string true "{{.Name}} ID"
+// @Success 200 {object} Response{{.Name}}
+// @Failure 400 {object} Response{{.Name}}
+// @Failure 202 {object} Response{{.Name}}
+// @Router /api/v1/{{lwc .Name}}/:id [GET]
+func (h *handler{{.Name}}) Get{{.Name}}ByID(c *fiber.Ctx) error {
+    res := Response{{.Name}}{Error: true}
+    if id == "" {
+        logger.Error.Println("id request no valid")
+        res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+        return c.Status(http.StatusBadRequest).JSON(res)
+    }
+
+    if !govalidator.IsUUIDv4(id) {
+        logger.Error.Println("id request is not a valid uuid")
+        res.Code, res.Type, res.Msg = msg.GetByCode(1, h.db, h.txID)
+        return c.Status(http.StatusBadRequest).JSON(res)
+    }
+
+    // TODO replace pkgReplaceME for the package name
+    srv := pkgReplaceME.NewServerPkgReplaceME(h.db, nil, h.txID)
+    data, code, err := srv.Srv{{.Name}}.Get{{.Name}}ByID(id)
+    if err != nil {
+        logger.Error.Printf("couldn't get {{.Name}} by id, error: %v", err)
+        res.Code, res.Type, res.Msg = msg.GetByCode(code, h.db, h.txID)
+        return c.Status(http.StatusAccepted).JSON(res)
+    }
+
+    res.Data = data
+    res.Error = false
+    res.Code, res.Type, res.Msg = msg.GetByCode(29, h.db, h.txID)
+    return c.Status(http.StatusOK).JSON(res)
+}
+
+// Get{{.Name}}ByID godoc
+// @Summary Obtiene todas las instancias de {{.Name}}
+// @Description Método que permite obtener todas las instancias del objeto {{.Name}} en la base de datos
+// @tags {{.Name}}
+// @Accept json
+// @Produce json
+// @Success 200 {object} Response{{.Name}}
+// @Failure 202 {object} Response{{.Name}}
+// @Router /api/v1/{{lwc .Name}}/all [GET]
+func (h *handler{{.Name}}) GetAll{{.Name}}(c *fiber.Ctx) error {
+	res := Response{{.Name}}{Error: true}
+
+    // TODO replace pkgReplaceME for the package name
+    srv := pkgReplaceME.NewServerPkgReplaceME(h.db, nil, h.txID)
+    data, err := srv.Srv{{.Name}}.GetAll{{.Name}}()
+    if err != nil {
+        logger.Error.Printf("couldn't get all {{.Name}}, error: %v", err)
+        res.Code, res.Type, res.Msg = msg.GetByCode(22, h.db, h.txID)
+        return c.Status(http.StatusAccepted).JSON(res)
+    }
+
+    res.Data = data
+	res.Error = false
+    res.Code, res.Type, res.Msg = msg.GetByCode(29, h.db, h.txID)
+	return c.Status(http.StatusOK).JSON(res)
+}
+

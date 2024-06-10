@@ -1,0 +1,5 @@
+{
+  "dest": "/gitlab.com/e-capture/ecatch-bpm/go-wizard-ecatch-engine/pkg",
+  "package_name": "gitlab.com/team-node/jobs/backend",
+  "src": "./source/pkg.csv"
+}

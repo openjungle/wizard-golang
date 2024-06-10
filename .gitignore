@@ -1,0 +1,36 @@
+# Created by https://www.gitignore.io/api/go
+
+### Go ###
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+.csv
+go-wizard-ecatch-engine
+
+# Test binary, build with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Archivos de configuración de pruebas
+config.json
+
+### Go Patch ###
+/vendor/
+/Godeps/
+/pkg/
+/source/
+
+
+# End of https://www.gitignore.io/api/go
+
+## IDEs
+.vscode/
+.idea/
+
+## Destination golden files
+dist/

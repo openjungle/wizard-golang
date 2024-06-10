@@ -1,0 +1,13 @@
+
+-- +migrate Up
+CREATE TABLE {{.Table}}(
+    [id] INT IDENTITY(1,1) PRIMARY KEY,
+    {{range .Fields -}}
+    [{{.Name}}] [{{sqlType .Type}}] {{if gt .Len 0}}({{.Len}}){{end}} {{.NotNull}},
+    {{end -}}
+    created_at [datetime] NOT NULL  DEFAULT (getdate()),
+    updated_at [datetime] NOT NULL  DEFAULT (getdate())
+);
+
+-- +migrate Down
+DROP TABLE {{.Table}};

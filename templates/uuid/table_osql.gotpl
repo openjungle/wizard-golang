@@ -1,0 +1,13 @@
+
+-- +migrate Up
+CREATE TABLE IF NOT EXISTS {{.Table}}(
+    id VARCHAR2(50) NOT NULL PRIMARY KEY,
+    {{range .Fields -}}
+    {{.Name}} {{osqlType .Type}} {{if gt .Len 0}}({{.Len}}){{end}} {{.NotNull}},
+    {{end -}}
+    created_at DATE DEFAULT sysdate NOT NULL,
+    updated_at DATE DEFAULT sysdate NOT NULL
+);
+
+-- +migrate Down
+DROP TABLE IF EXISTS {{.Table}};

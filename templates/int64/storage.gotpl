@@ -1,0 +1,40 @@
+package {{pkg .Table}}
+
+import (
+	"github.com/jmoiron/sqlx"
+
+	"{{index .PackageRoutes "package_name"}}/internal/logger"
+    "{{index .PackageRoutes "package_name"}}/internal/models"
+)
+
+const (
+	Postgresql = "postgres"
+	SqlServer  = "sqlserver"
+	Oracle     = "oci8"
+)
+
+type Services{{.Name}}Repository interface {
+	create(m *{{.Name}}) error
+	update(m *{{.Name}}) error
+	delete(id int64) error
+	getByID(id int64) (*{{.Name}}, error)
+	getAll() ([]*{{.Name}}, error)
+}
+
+func FactoryStorage(db *sqlx.DB, user *models.User, txID string) Services{{.Name}}Repository {
+	var s Services{{.Name}}Repository
+	engine := db.DriverName()
+	switch engine {
+	case SqlServer:
+		return new{{.Name}}SqlServerRepository(db, user, txID)
+	case Postgresql:
+		return new{{.Name}}PsqlRepository(db, user, txID)
+	case Oracle:
+		return new{{.Name}}OrclRepository(db, user, txID)
+	default:
+		logger.Error.Println("el motor de base de datos no está implementado.", engine)
+	}
+	return s
+}
+
+

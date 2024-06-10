@@ -1,0 +1,34 @@
+package {{pkg .Table}}
+
+import (
+	"time"
+
+	"github.com/asaskevich/govalidator"
+)
+
+// {{.Name}}  Model struct {{.Name}}
+type {{.Name}}  struct {
+        ID string `json:"id" db:"id" valid:"required,uuid"`
+        {{range .Fields -}}
+        {{ucc .Name}} {{mdlType .Type}} `json:"{{.Name}}" db:"{{.Name}}" valid:"required"`
+        {{end -}}
+        CreatedAt time.Time `json:"created_at" db:"created_at"`
+        UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+}
+
+func New{{.Name}}(id string,{{range .Fields -}} {{lcc .Name}} {{mdlType .Type}} ,{{end -}}) *{{.Name}} {
+	return &{{.Name}}{
+		ID:           id,
+		{{range .Fields -}}
+		{{ucc .Name}} : {{lcc .Name}},
+		{{end -}}
+	}
+}
+
+func (m *{{.Name}} ) valid() (bool, error) {
+	result, err := govalidator.ValidateStruct(m)
+	if err != nil {
+		return result, err
+	}
+	return result, nil
+}

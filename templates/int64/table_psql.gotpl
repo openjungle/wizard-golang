@@ -1,0 +1,13 @@
+
+-- +migrate Up
+CREATE TABLE IF NOT EXISTS {{.Table}}(
+    id BIGSERIAL  NOT NULL PRIMARY KEY,
+    {{range .Fields -}}
+    {{.Name}} {{psqlType .Type}} {{if gt .Len 0}}({{.Len}}){{end}} {{.NotNull}},
+    {{end -}}
+    created_at TIMESTAMP NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP NOT NULL DEFAULT now()
+);
+
+-- +migrate Down
+DROP TABLE IF EXISTS {{.Table}};
