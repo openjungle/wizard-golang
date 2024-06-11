@@ -7,6 +7,7 @@ type Model struct {
 	Table         string
 	Fields        []Field
 	PackageRoutes map[string]string
+	LogicDelete   string
 }
 
 // Field structura de un tipo de campo del modelo

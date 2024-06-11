@@ -37,11 +37,12 @@ func generateFromFile(file string) {
 			os.Exit(1)
 		}
 
-		h = record[0]
-		id = record[1]
-		n = record[2]
-		t = record[3]
-		fields := record[4]
+		l = record[0]
+		h = record[1]
+		id = record[2]
+		n = record[3]
+		t = record[4]
+		fields := record[5]
 
 		if t == "" {
 			color.Red(fmt.Sprintf("no se procesó el modelo: %s porque no se recibieron campos", id))

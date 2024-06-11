@@ -1,2 +1,0 @@
-api;uuid;Users;auth.users;username:string:f:50 password:string:f:255 email_notifications:string:f:255 phone:string:f:10 user_status_id:int:f:0 failed_attempts:int:f:4 last_change_password:time.Time:f:0 block_date:time.Time:t:0 disable_date:time.Time:t:0 change_password:bool:f:0 is_block:bool:f:0 is_disabled:bool:f:0 last_login:time.Time:t:0 change_first_password:bool:f:0 user_type_id:int:f:0
-no-api;int;UserStatus;auth.user_status;name:string:f:50 value:int:f:4 description:string:f:255 user_modifier:uuid:f:0

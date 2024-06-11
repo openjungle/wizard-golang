@@ -7,16 +7,29 @@ los scripts de base de datos y los handlers referentes al modelo.
 
 Para generar el paquete se tiene que seguir la siguiente estructura:
 
-1. handler: Campo que indica si el paquete que se va a crear requerira crear los archivos API REST.
-2. id: Indica el tipo de id para el paquete en la base de datos (`int`, `int64`, `uuid`).
-3. name: Indica el nombre del paquete, este tiene que empezar por una letra del abecedario sin tildes y debe empezar con
+1. borrado: Tipo de borrado que se va a realizar en la base de datos (`logic`, `physical`).
+2. handler: Campo que indica si el paquete que se va a crear requerira crear los archivos API REST.
+3. id: Indica el tipo de id para el paquete en la base de datos (`int`, `int64`, `uuid`).
+4. name: Indica el nombre del paquete, este tiene que empezar por una letra del abecedario sin tildes y debe empezar con
    la primera letra en mayuscula y en singular.
-4. db: Indica el nombre de la base de datos, esta compuesta por el nombre del schema y el nombre del paquete,
+5. db: Indica el nombre de la base de datos, esta compuesta por el nombre del schema y el nombre del paquete,
    ejemplo: `cfg.module`, donde `cfg` es el nombre del schema y `module` es el nombre del paquete (el nombre debe de
    estar en el formato snake_case y en plural).
-5. fields: Lista los campos (atributos) que tendrá el paquete.
+6. fields: Lista los campos (atributos) que tendrá el paquete.
 
 ## Formato de los campos
+
+#### Tipo de borrado
+
+* Logic: borrado logico
+* Physical: borrado fisico
+
+#### Paquete API
+
+Espeficia si el paquete va a tener un API REST (handler).
+
+* api: si va a tener un API REST
+* no-api: si no va a tener un API REST
 
 #### ID
 
@@ -95,7 +108,7 @@ GOOS=windows GOARCH=amd64 go build -o go-wizard-open-jungle
 ## Ejemplo archivo csv
 
 ````csv
-int;Module;cfg.modules;name:string:f:20 url_font:string:f:255 class:string:f:50 module_id:string:f:50
-int64;Element;cfg.elements;name:string:f:20 url_font:string:f:255 class:string:f:50 module_id:string:f:50
-uuid;Component;cfg.components;name:string:f:20 url_font:string:f:255 class:string:f:50 module_id:string:f:50
+logic;api;int;Module;cfg.modules;name:string:f:20 url_font:string:f:255 class:string:f:50 module_id:string:f:50
+physical;no-api;int64;Element;cfg.elements;name:string:f:20 url_font:string:f:255 class:string:f:50 module_id:string:f:50
+physical;api;uuid;Component;cfg.components;name:string:f:20 url_font:string:f:255 class:string:f:50 module_id:string:f:50
 ````

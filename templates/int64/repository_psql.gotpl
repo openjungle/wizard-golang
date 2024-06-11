@@ -64,16 +64,30 @@ func (s *psql) update(m *{{.Name}}) error {
 
 // Delete elimina un registro de la BD
 func (s *psql) delete(id int64) error {
-	const psqlDelete = `DELETE FROM {{.Table}} WHERE id = :id `
-	m := {{.Name}}{ID: id}
-	rs, err := s.DB.NamedExec(psqlDelete, &m)
-	if err != nil {
-		return err
-	}
-	if i, _ := rs.RowsAffected(); i == 0 {
-		return fmt.Errorf("ecatch:108")
-	}
-	return nil
+    {{if eq .LogicDelete "logic"}}
+    // Logical delete
+    const psqlLogicalDelete = `UPDATE {{.Table}} SET is_deleted = true, user_deleter = :user_deleter, deleted_at = now() WHERE id = :id`
+    m := {{.Name}}{ID: id, UserDeleter: s.user.ID}
+    rs, err := s.DB.NamedExec(psqlLogicalDelete, &m)
+    if err != nil {
+        return err
+    }
+    if i, _ := rs.RowsAffected(); i == 0 {
+        return fmt.Errorf("ecatch:108")
+    }
+    {{else}}
+    // Physical delete
+    const psqlDelete = `DELETE FROM {{.Table}} WHERE id = :id`
+    m := {{.Name}}{ID: id}
+    rs, err := s.DB.NamedExec(psqlDelete, &m)
+    if err != nil {
+        return err
+    }
+    if i, _ := rs.RowsAffected(); i == 0 {
+        return fmt.Errorf("ecatch:108")
+    }
+    {{end}}
+    return nil
 }
 
 // GetByID consulta un registro por su ID

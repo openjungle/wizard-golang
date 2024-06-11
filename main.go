@@ -21,6 +21,7 @@ var (
 	tplInt64 *template.Template
 	fm       = template.FuncMap{}
 	// id tipo de dato para crear el ID
+	l  string
 	id string
 	h  string
 	// n nombre del paqute
@@ -58,7 +59,7 @@ func main() {
 }
 
 func execute() {
-	m := Model{id, n, t, fs, ps}
+	m := Model{id, n, t, fs, ps, l}
 	gopath := os.Getenv("GOPATH")
 	realDest := []string{gopath, "src"}
 	realDest = append(realDest, strings.Split(ps["dest"], "/")...)
