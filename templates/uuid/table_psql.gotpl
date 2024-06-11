@@ -5,6 +5,10 @@ CREATE TABLE IF NOT EXISTS {{.Table}}(
     {{range .Fields -}}
     {{.Name}} {{psqlType .Type}} {{if gt .Len 0}}({{.Len}}){{end}} {{.NotNull}},
     {{end -}}
+    is_deleted bool NOT NULL DEFAULT false,
+    user_deleter uuid NULL,
+    deleted_at TIMESTAMP NULL,
+    user_creator uuid NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT now(),
     updated_at TIMESTAMP NOT NULL DEFAULT now()
 );
