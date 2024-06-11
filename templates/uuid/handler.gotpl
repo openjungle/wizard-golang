@@ -4,7 +4,7 @@ package {{pkg .Table}}
 import (
 	"{{index .PackageRoutes "package_name"}}/internal/logger"
 	"{{index .PackageRoutes "package_name"}}/internal/models"
-	"{{index .PackageRoutes "package_name"}}internal/messages"
+	"{{index .PackageRoutes "package_name"}}/internal/messages"
 	"github.com/jmoiron/sqlx"
 	"github.com/google/uuid"
 	"github.com/asaskevich/govalidator"
