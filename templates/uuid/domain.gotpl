@@ -10,7 +10,7 @@ import (
 type {{.Name}}  struct {
         ID string `json:"id" db:"id" valid:"required,uuid"`
         {{range .Fields -}}
-        {{ucc .Name}} {{mdlType .Type}} `json:"{{.Name}}" db:"{{.Name}}" valid:"required"`
+        {{ucc .Name}} {{mdlType .Type}} `json:"{{.Name}}" db:"{{.Name}}"{{if ne .Type "bool"}} valid:"required"{{end -}}`
         {{end -}}
         IsDeleted   bool         `json:"is_deleted" db:"is_deleted"`
         UserDeleter *string      `json:"user_deleter" db:"user_deleter"`

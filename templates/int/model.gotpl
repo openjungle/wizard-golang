@@ -15,7 +15,7 @@ type Response{{.Name}} struct {
 type Request{{.Name}} struct {
     ID int `json:"id" valid:"-"`
     {{range .Fields -}}
-        {{ucc .Name}} {{mdlType .Type}} `json:"{{.Name}}" valid:"required"`
+        {{ucc .Name}} {{mdlType .Type}} `json:"{{.Name}}" {{if ne .Type "bool"}} valid:"required"{{end -}}`
     {{end -}}
 }
 
