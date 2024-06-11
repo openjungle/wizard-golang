@@ -4,6 +4,7 @@ package {{pkg .Table}}
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"{{index .PackageRoutes "package_name"}}/internal/models"
@@ -30,7 +31,8 @@ func (s *sqlserver) create(m *{{.Name}}) error {
     date := time.Now()
     m.UpdatedAt = date
     m.CreatedAt = date
-	const sqlInsert = `INSERT INTO {{.Table}} (id ,{{range $i, $v := .Fields}}{{.Name}}{{if lt $i (dec $length)}}, {{end}}{{end -}}, created_at, updated_at) VALUES (:id ,{{range $i, $v := .Fields}}:{{.Name}}{{if lt $i (dec $length)}}, {{end}}{{end -}}:created_at, :updated_at) `
+    m.UserCreator = s.user.ID
+	const sqlInsert = `INSERT INTO {{.Table}} (id ,{{range $i, $v := .Fields}}{{.Name}}{{if lt $i (dec $length)}}, {{end}}{{end -}}, user_creator, created_at, updated_at) VALUES (:id ,{{range $i, $v := .Fields}}:{{.Name}}{{if lt $i (dec $length)}}, {{end}}{{end -}}:user_creator, :created_at, :updated_at) `
 	rs, err := s.DB.NamedExec(sqlInsert, &m)
 	if err != nil {
 		return err
@@ -45,7 +47,7 @@ func (s *sqlserver) create(m *{{.Name}}) error {
 func (s *sqlserver) update(m *{{.Name}}) error {
     date := time.Now()
     m.UpdatedAt = date
-	const sqlUpdate = `UPDATE {{.Table}} SET {{range $i, $v := .Fields}}{{.Name}} = :{{.Name}}, {{end -}}updated_at = :updated_at WHERE id = :id `
+	const sqlUpdate = `UPDATE {{.Table}} SET {{range $i, $v := .Fields}}{{.Name}} = :{{.Name}}, {{end -}}user_creator = :user_creator, updated_at = :updated_at WHERE id = :id `
 	rs, err := s.DB.NamedExec(sqlUpdate, &m)
 	if err != nil {
 		return err
@@ -72,7 +74,7 @@ func (s *sqlserver) delete(id string) error {
 
 // GetByID consulta un registro por su ID
 func (s *sqlserver) getByID(id string) (*{{.Name}}, error) {
-	const sqlGetByID = `SELECT convert(nvarchar(50), id) id , {{range .Fields}}{{.Name}}, {{end -}}created_at, updated_at FROM {{.Table}}  WITH (NOLOCK)  WHERE id = @id `
+	const sqlGetByID = `SELECT convert(nvarchar(50), id) id , {{range .Fields}}{{.Name}}, {{end -}}is_deleted, user_deleter, deleted_at, user_creator, created_at, updated_at FROM {{.Table}}  WITH (NOLOCK)  WHERE id = @id `
 	mdl := {{.Name}}{}
 	err := s.DB.Get(&mdl, sqlGetByID, sql.Named("id", id))
 	if err != nil {
@@ -87,7 +89,7 @@ func (s *sqlserver) getByID(id string) (*{{.Name}}, error) {
 // GetAll consulta todos los registros de la BD
 func (s *sqlserver) getAll() ([]*{{.Name}}, error) {
 	var ms []*{{.Name}}
-	const sqlGetAll = `SELECT convert(nvarchar(50), id) id , {{range .Fields}}{{.Name}}, {{end -}}created_at, updated_at FROM {{.Table}}  WITH (NOLOCK) `
+	const sqlGetAll = `SELECT convert(nvarchar(50), id) id , {{range .Fields}}{{.Name}}, {{end -}}is_deleted, user_deleter, deleted_at, user_creator, created_at, updated_at FROM {{.Table}}  WITH (NOLOCK) `
 
 	err := s.DB.Select(&ms, sqlGetAll)
 	if err != nil {
