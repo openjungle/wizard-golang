@@ -71,12 +71,12 @@ func (s *sqlserver) update(m *{{.Name}}) error {
 }
 
 // Delete elimina un registro de la BD
-func (s *psql) delete(id int) error {
+func (s *sqlserver) delete(id int) error {
     {{if eq .LogicDelete "logic"}}
     // Logical delete
     date := time.Now()
     const psqlLogicalDelete = `UPDATE {{.Table}} SET is_deleted = 1, user_deleter = :user_deleter, deleted_at = :deleted_at WHERE id = :id`
-    m := {{.Name}}{ID: id, UserDeleter: s.user.ID, DeletedAt: date}
+    m := {{.Name}}{ID: id, UserDeleter: &s.user.ID, DeletedAt: &date}
     rs, err := s.DB.NamedExec(psqlLogicalDelete, &m)
     if err != nil {
         return err
